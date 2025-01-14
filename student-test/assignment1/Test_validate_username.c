@@ -19,7 +19,7 @@ void test_validate_my_username()
      * config file and my_username() functions are setup properly
      */
     const char* username_hardcoded = my_username();
-    char* username_confingured = malloc_username_from_conf_file();
-    int cmp_result = strcmp(username_confingured, username_hardcoded);
+    char* username_configured = malloc_username_from_conf_file();
+    int cmp_result = strcmp(username_configured, username_hardcoded);
     TEST_ASSERT_TRUE_MESSAGE(cmp_result == 0, "Student name is not configured properly");
 }
