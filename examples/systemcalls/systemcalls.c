@@ -1,7 +1,9 @@
 #include "systemcalls.h"
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -63,14 +65,22 @@ bool do_exec(int count, ...)
     }
     else if (pid == 0)
     {
-        execv(command, args);
-        exit(0);
+        va_end(args);
+        execv(command[0], command);
+        exit(1);
     }
     va_end(args);
     int status;
     if (waitpid(pid, &status, 0) == -1)
     {
         return false;
+    }
+    if (WIFEXITED(status))
+    {
+        int exit_code = WEXITSTATUS(status);
+        if (exit_code!= 0) {
+            return false;
+        }
     }
     return true;
 }
@@ -119,9 +129,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
             perror("dup2");
             exit(-1);
         }
-        execv(command, args);
+        execv(command[0], command);
         close(fd);
-        exit(0);
     }
     va_end(args);
     int status;
@@ -129,8 +138,14 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     {
         return false;
     }
+    if (WIFEXITED(status))
+    {
+        int exit_code = WEXITSTATUS(status);
+        if (exit_code!= 0) {
+            return false;
+        }
+    }
 
-    va_end(args);
 
     return true;
 }
